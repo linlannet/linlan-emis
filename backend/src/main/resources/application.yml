@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: linlan-emis
+  # 生产 MySQL 配置示例（去掉注释并切换 datasource 即可）：
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/emisdb_2.0?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: lldba
+    password: DB_Lldba_2023!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  h2:
+    console:
+      enabled: true
+  # OAuth2 授权服务器颁发者（OIDC Discovery 使用，须与浏览器访问地址一致）
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: http://localhost:8080
+
+mybatis:
+  type-aliases-package: net.linlan.emis.sys.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+# JWT 配置（前缀由 dsh.ontology.* 统一改为 emis.* ）
+emis:
+  jwt:
+    secret: "linlan-emis-change-me-in-production-0123456789abcdef"
+    expiration-ms: 86400000
+    header: Authorization
+    prefix: "Bearer "
+    # 桌面端无登录界面时默认以主任放行：仅本地/内网演示用，生产务必 false
+    default-director-enabled: false
+
+

@@ -1,0 +1,37 @@
+# linlan-emis (BuddyOne) — Multi-tenant IAM / SSO
+
+> A standalone multi-tenant identity & access management (IAM/SSO) platform built on Spring Boot 3.5.16 + Java 17.
+> Provides local-account auth, a standard OAuth2/OIDC authorization server, tenant context, and role-based access.
+
+Key capabilities:
+- Authentication: local accounts (BCrypt); third-party federation and OTP/MFA (planned)
+- Authorization: standard OAuth2 + OIDC authorization server, issues access/refresh/id_token (JWT, JWKS-verifiable)
+- Multi-tenancy: tenant_id kernel + TenantContext + row-level isolation
+- Basic roles: role_level (0 主任 / 1 研究员 / 2 访客) as cross-product semantics
+- Minimal backend (P0): JJWT issuance, TenantContext, @RequiresRole (fail-closed)
+
+Tech stack: Java 17, Spring Boot 3.5.16, MyBatis 3.0.5, jjwt 0.12.6, Spring Security, spring-authorization-server 1.x, H2/MySQL
+Version: 0.1.0
+Repository: https://github.com/linlannet/linlan-emis
+Related repositories: dsh-java (OAuth2 resource server), dsh-java-desktop (OIDC client), emis-java-backend (reference impl), dsh-java-ontology (tenant/role blueprint)
+
+Modules:
+- backend/        emis-backend (Spring Boot app, artifactId emis-backend, v0.1.0)
+- test-client/    linlan-emis-test-client (demo OIDC authorization-code client, v0.1.0)
+- py-api/         Python API (placeholder)
+- frontend/       Web console (placeholder)
+- scripts/        bash helpers: package.sh, start-local-jar.sh, start-mysql-jar.sh, verify-oidc.sh
+- docs/           01-architecture.md, 02-user-tenant-model.md, 03-oauth2-authorization-server.md, 04-permission-model.md
+
+Build (backend):  cd backend && mvn -q -DskipTests clean package
+Run (local/H2):   ./scripts/start-local-jar.sh --build
+  URL: http://localhost:8080
+  Login: POST /api/auth/login { userName, password }
+  Default accounts: admin/admin123 (roleLevel=0), guest/guest123 (roleLevel=2)
+  H2 console: http://localhost:8080/h2-console
+
+Docs:
+- README.md / README.en.md
+- docs/01-architecture.md ... docs/04-permission-model.md
+- AGENTS.md
+- CHANGELOG.md
