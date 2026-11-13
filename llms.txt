@@ -11,17 +11,17 @@ Key capabilities:
 - Minimal backend (P0): JJWT issuance, TenantContext, @RequiresRole (fail-closed)
 
 Tech stack: Java 17, Spring Boot 3.5.16, MyBatis 3.0.5, jjwt 0.12.6, Spring Security, spring-authorization-server 1.x, H2/MySQL
-Version: 0.1.0
+Version: 1.0.0
 Repository: https://github.com/linlannet/linlan-emis
 Related repositories: dsh-java (OAuth2 resource server), dsh-java-desktop (OIDC client), emis-java-backend (reference impl), dsh-java-ontology (tenant/role blueprint)
 
 Modules:
-- backend/        emis-backend (Spring Boot app, artifactId emis-backend, v0.1.0)
-- test-client/    linlan-emis-test-client (demo OIDC authorization-code client, v0.1.0)
+- backend/        emis-backend (Spring Boot app, artifactId emis-backend, v1.0.0)
+- test-client/    linlan-emis-test-client (demo OIDC authorization-code client, v1.0.0)
 - py-api/         Python API (placeholder)
 - frontend/       Web console (placeholder)
 - scripts/        bash helpers: package.sh, start-local-jar.sh, start-mysql-jar.sh, verify-oidc.sh
-- docs/           01-architecture.md, 02-user-tenant-model.md, 03-oauth2-authorization-server.md, 04-permission-model.md
+- docs/1.0.0/   design set (spec.md, design.md, tasks.md, release-v1.0.0-development-notes.md) + existing design (01-architecture.md, 02-user-tenant-model.md, 03-oauth2-authorization-server.md, 04-permission-model.md)
 
 Build (backend):  cd backend && mvn -q -DskipTests clean package
 Run (local/H2):   ./scripts/start-local-jar.sh --build

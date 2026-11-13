@@ -24,7 +24,7 @@ spring:
         issuer: http://localhost:8080
 
 mybatis:
-  type-aliases-package: net.linlan.emis.sys.entity
+  type-aliases-package: net.linlan.emis.*.entity
   configuration:
     map-underscore-to-camel-case: true
 

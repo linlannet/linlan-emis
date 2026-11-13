@@ -1,15 +1,15 @@
 # AGENTS.md — linlan-emis (BuddyOne)
 
 ## Project
-Java 17 + Spring Boot 3.5.16 **multi-tenant IAM / SSO** platform (local-account auth, OAuth2/OIDC authorization server, tenant context, role-based access). Version 0.1.0.
+Java 17 + Spring Boot 3.5.16 **multi-tenant IAM / SSO** platform (local-account auth, OAuth2/OIDC authorization server, tenant context, role-based access). Version 1.0.0.
 
 ## Layout
-- `backend/`        emis-backend — Spring Boot app (artifactId emis-backend, v0.1.0); local auth + JJWT + TenantContext + @RequiresRole (fail-closed)
-- `test-client/`    linlan-emis-test-client — demo OIDC authorization-code client (v0.1.0)
+- `backend/`        emis-backend — Spring Boot app (artifactId emis-backend, v1.0.0); local auth + JJWT + TenantContext + @RequiresRole (fail-closed)
+- `test-client/`    linlan-emis-test-client — demo OIDC authorization-code client (v1.0.0)
 - `py-api/`         Python API (placeholder)
 - `frontend/`       Web console (placeholder)
 - `scripts/`        bash helpers: package.sh, start-local-jar.sh, start-mysql-jar.sh, verify-oidc.sh
-- `docs/`           01-architecture.md, 02-user-tenant-model.md, 03-oauth2-authorization-server.md, 04-permission-model.md
+- `docs/1.0.0/`     design set (spec.md, design.md, tasks.md, release-v1.0.0-development-notes.md) + existing design (01-architecture.md, 02-user-tenant-model.md, 03-oauth2-authorization-server.md, 04-permission-model.md)
 
 Dependency direction: business rules live in the backend's service/security layer; controllers only translate protocol; JWT/tenant semantics are shared via `TenantContext` and `@RequiresRole`.
 
@@ -35,5 +35,5 @@ Dependency direction: business rules live in the backend's service/security laye
 
 ## Key Docs
 - `README.md`, `README.en.md`
-- `docs/01-architecture.md` ... `docs/04-permission-model.md`
+- `docs/1.0.0/01-architecture.md` ... `docs/1.0.0/04-permission-model.md`
 - `llms.txt`, `CHANGELOG.md`

@@ -1,7 +1,7 @@
 # 版本
 
-> 各版本详情见 `docs/` 架构文档；以下按模块记录功能更新。
-## 版本号：0.1.0
+> 各版本详情见 `docs/1.0.0/` 架构文档；以下按模块记录功能更新。
+## 版本号：1.0.0
 - 更新日期：2026-11-13
 - 状态：开发预览（P0 最小后端骨架已落地）
 
@@ -18,6 +18,8 @@
 - **AI 可发现性（默认文件补齐，参考 dsh-java）**：
   - 新增 `AGENTS.md`（构建/测试命令与约定）、`llms.txt`（面向 LLM 的项目摘要）、`README.en.md`（英文 README），以及本 `CHANGELOG.md`
   - `README.md` 补充 "For AI" 链接（指向 `llms.txt` / `AGENTS.md`）
+  - **设计四件套初始化（参考 dsh-java 0.2.3 模板）**：新增 `docs/1.0.0/spec.md`（需求规格）/ `design.md`（技术方案）/ `tasks.md`（任务清单）/ `release-v1.0.0-development-notes.md`（开发说明），复用既有 `01-architecture.md`~`04-permission-model.md`；架构文档由 `docs/` 重组至 `docs/1.0.0/`
+  - **版本对齐**：backend / test-client 版本统一为 `1.0.0`（与文档版本一致）
 
 ## 演进分期
 - **P0（已完成）**：最小后端骨架——本地登录 + JJWT 签发 + `tenant_id`/`role_level` + `TenantContext` + `@RequiresRole`(fail-closed)

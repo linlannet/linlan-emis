@@ -59,12 +59,12 @@ cd backend && mvn -q -DskipTests clean package
 
 ## 模块
 
-- `backend/` —— `emis-backend`（Spring Boot 应用，v0.1.0）
-- `test-client/` —— `linlan-emis-test-client`（演示 OIDC 授权码客户端，v0.1.0）
+- `backend/` —— `emis-backend`（Spring Boot 应用，v1.0.0）
+- `test-client/` —— `linlan-emis-test-client`（演示 OIDC 授权码客户端，v1.0.0）
 - `py-api/` —— Python API（占位）
 - `frontend/` —— Web 控制台（占位）
 - `scripts/` —— `package.sh` / `start-local-jar.sh` / `start-mysql-jar.sh` / `verify-oidc.sh`
-- `docs/` —— `01-architecture.md` / `02-user-tenant-model.md` / `03-oauth2-authorization-server.md` / `04-permission-model.md`
+- `docs/1.0.0/` —— 设计四件套：`spec.md`（需求规格）/ `design.md`（技术方案）/ `tasks.md`（任务清单）/ `release-v1.0.0-development-notes.md`（开发说明）；既有设计：`01-architecture.md` / `02-user-tenant-model.md` / `03-oauth2-authorization-server.md` / `04-permission-model.md`
 
 ## 安全与隔离
 

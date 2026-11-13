@@ -14,7 +14,7 @@
 
     <groupId>net.linlan.emis</groupId>
     <artifactId>linlan-emis-test-client</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <name>linlan-emis-test-client</name>
     <description>
         linlan-emis 的演示 OIDC 客户端：以标准 OAuth2 授权码流程登录 BuddyOne（backend），

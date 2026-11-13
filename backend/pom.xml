@@ -14,7 +14,7 @@
 
     <groupId>net.linlan.emis</groupId>
     <artifactId>emis-backend</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <name>emis-backend</name>
     <description>
         linlan-emis 后端（最小化）：整合 emis-java-backend 用户模型 与 dsh-java-ontology 租户/权限核心，

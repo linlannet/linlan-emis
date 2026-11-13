@@ -82,7 +82,7 @@ Configure `backend/src/main/resources/application-mysql.yml` (datasource), then:
 
 ```bash
 cd backend && mvn -q -DskipTests clean package
-java -jar backend/target/emis-backend-0.1.0.jar --spring.profiles.active=mysql
+java -jar backend/target/emis-backend-1.0.0.jar --spring.profiles.active=mysql
 ```
 
 ### 3.5 Default Accounts
@@ -106,16 +106,16 @@ Seeded by `DataInitializer`:
 
 ## 4. Architecture
 
-BuddyOne is an independent Spring Boot service. Downstream products authenticate via standard OIDC: **DSH-Desktop** is an OIDC public client; **dsh-java** is reworked as an OAuth2 resource server validating BuddyOne-issued JWTs through JWKS, while keeping an `ApiKeyAuthInterceptor` for inter-service machine credentials. See `docs/01-architecture.md` for the deployment topology.
+BuddyOne is an independent Spring Boot service. Downstream products authenticate via standard OIDC: **DSH-Desktop** is an OIDC public client; **dsh-java** is reworked as an OAuth2 resource server validating BuddyOne-issued JWTs through JWKS, while keeping an `ApiKeyAuthInterceptor` for inter-service machine credentials. See `docs/1.0.0/01-architecture.md` for the deployment topology.
 
 ## 5. Modules
 
-- `backend/` — `emis-backend` (Spring Boot app, v0.1.0)
-- `test-client/` — `linlan-emis-test-client` (demo OIDC auth-code client, v0.1.0)
+- `backend/` — `emis-backend` (Spring Boot app, v1.0.0)
+- `test-client/` — `linlan-emis-test-client` (demo OIDC auth-code client, v1.0.0)
 - `py-api/` — Python API (placeholder)
 - `frontend/` — Web console (placeholder)
 - `scripts/` — `package.sh`, `start-local-jar.sh`, `start-mysql-jar.sh`, `verify-oidc.sh`
-- `docs/` — `01-architecture.md`, `02-user-tenant-model.md`, `03-oauth2-authorization-server.md`, `04-permission-model.md`
+- `docs/1.0.0/` — design set: `spec.md` (requirements), `design.md` (technical), `tasks.md` (tasks), `release-v1.0.0-development-notes.md` (release notes); existing design: `01-architecture.md`, `02-user-tenant-model.md`, `03-oauth2-authorization-server.md`, `04-permission-model.md`
 
 ## 6. Security & Isolation
 
