@@ -1,0 +1,22 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: emis-test-client
+  security:
+    oauth2:
+      client:
+        registration:
+          # registrationId 决定回调路径：http://localhost:8081/login/oauth2/code/buddyone
+          buddyone:
+            client-id: test-client
+            client-secret: test-secret
+            client-name: BuddyOne
+            scope: openid,profile,tenant
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+        provider:
+          # 通过 issuer-uri 自动发现 authorize/token/jwks/userinfo 端点
+          buddyone:
+            issuer-uri: http://localhost:8080
