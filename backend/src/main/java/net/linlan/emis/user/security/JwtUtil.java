@@ -37,7 +37,7 @@ public class JwtUtil {
                 .claim("tenant_id", tenantId)
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(key)
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 

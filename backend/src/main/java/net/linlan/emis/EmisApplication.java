@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 // spring-security-oauth2-resource-server 作为 SAS 的传递依赖会被自动配置成资源服务器，
 // 导致 /oauth2/token 等端点被 BearerTokenAuthenticationFilter 拦截（401 Bearer），需排除。
 @SpringBootApplication(excludeName = "org.springframework.boot.autoconfigure.security.oauth2.server.resource.servlet.OAuth2ResourceServerAutoConfiguration")
-@MapperScan("net.linlan.emis.user.mapper")
+@MapperScan({"net.linlan.emis.user.mapper", "net.linlan.emis.federated.repository"})
 public class EmisApplication {
 
     public static void main(String[] args) {

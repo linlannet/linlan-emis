@@ -1,29 +1,54 @@
 # linlan-emis (BuddyOne) — Multi-tenant IAM / SSO
 
 > A standalone multi-tenant identity & access management (IAM/SSO) platform built on Spring Boot 3.5.16 + Java 17.
-> Provides local-account auth, a standard OAuth2/OIDC authorization server, tenant context, and role-based access.
+> Provides local-account auth, GitHub App / WeChat QR federation, a standard OAuth2/OIDC authorization server, tenant context, and role-based access.
 
 Key capabilities:
-- Authentication: local accounts (BCrypt); third-party federation and OTP/MFA (planned)
-- Authorization: standard OAuth2 + OIDC authorization server, issues access/refresh/id_token (JWT, JWKS-verifiable)
+- Authentication: local accounts (BCrypt); GitHub App + WeChat website QR federation (v1.1.0, opt-in); OTP/MFA (planned)
+- Federation identity keys: GitHub numeric user id; WeChat unionid (missing unionid -> 40115, never openid)
+- Self-provisioning: experience tenant tenant_id=2 + experience role role_level=2; no admin approval; email/phone conflict -> 40910
+- Authorization: standard OAuth2 + OIDC authorization server, issues access/refresh/id_token (RS256 JWT, JWKS-verifiable)
+- Platform API token: existing HS256 JWT, identical claims to local login (sub / user_name / preferred_username / role_level / tenant_id)
 - Multi-tenancy: tenant_id kernel + TenantContext + row-level isolation
 - Basic roles: role_level (0 主任 / 1 研究员 / 2 访客) as cross-product semantics
-- Minimal backend (P0): JJWT issuance, TenantContext, @RequiresRole (fail-closed)
+- Fail-closed: @RequiresRole + RoleInterceptor; untrusted X-Role-Level / X-User-Id / X-Tenant-Id headers are ignored by default
 
 Tech stack: Java 17, Spring Boot 3.5.16, MyBatis 3.0.5, jjwt 0.12.6, Spring Security, spring-authorization-server 1.x, H2/MySQL
-Version: 1.0.0
+Version: 1.1.0
 Repository: https://github.com/linlannet/linlan-emis
-Related repositories: dsh-java (OAuth2 resource server), dsh-java-desktop (OIDC client), emis-java-backend (reference impl), dsh-java-ontology (tenant/role blueprint)
+Related repositories: dsh-java (OAuth2 resource server / may configure its own other IdPs), dsh-java-desktop (OIDC client), emis-java-backend (reference impl, ideas only), dsh-java-ontology (tenant/role blueprint)
+
+Federation endpoints:
+- GET /api/auth/federated/{provider}/authorize   (github | wechat; response_mode=redirect|json)
+- GET /api/auth/federated/{provider}/bind/authorize
+- GET /api/auth/federated/{provider}/callback
+- GET /api/auth/federated/bindings
+- DELETE /api/auth/federated/bindings/{bindingId}
+- GET /api/auth/federated/providers             (roleLevel=0; booleans only)
+- GET /api/auth/federated/wechat/in-app-browser-guide
+
+Federation config (environment only, never in YAML/DB):
+- EMIS_FEDERATED_GITHUB_ENABLED / _CLIENT_ID / _CLIENT_SECRET / _REDIRECT_URI / _APP_ID / _PRIVATE_KEY_PATH
+- EMIS_FEDERATED_WECHAT_ENABLED / _APP_ID / _APP_SECRET / _REDIRECT_URI
+- EMIS_FEDERATED_PROVISIONING_ENABLED / _DEFAULT_TENANT_ID (2) / _DEFAULT_ROLE_LEVEL (2)
+- EMIS_FEDERATED_STATE_TTL (10m) / _MAX_ENTRIES
+- EMIS_FEDERATED_RATE_LIMIT_AUTHORIZE_PER_MINUTE (20) / _CALLBACK_PER_MINUTE (30) / _LOCAL_LOGIN_PER_MINUTE (10)
+- EMIS_FEDERATED_REDIRECT_WHITELIST (comma-separated, exact match)
+- EMIS_TENANT_HEADER_TRUST_ENABLED (false by default)
+
+Business error codes: 50300 not configured / 40110 cancelled / 40111 invalid state / 40112 invalid code / 40113 missing subject / 40114 rejected credentials / 40115 missing unionid / 40310 not bound / 40311 disabled / 40312 bind conflict / 40313 last login method / 40314 experience tenant unavailable / 40910 email conflict / 42900 rate limited / 50200 provider error
 
 Modules:
-- backend/        emis-backend (Spring Boot app, artifactId emis-backend, v1.0.0)
+- backend/        emis-backend (Spring Boot app, artifactId emis-backend, v1.1.0)
 - test-client/    linlan-emis-test-client (demo OIDC authorization-code client, v1.0.0)
 - py-api/         Python API (placeholder)
 - frontend/       Web console (placeholder)
 - scripts/        bash helpers: package.sh, start-local-jar.sh, start-mysql-jar.sh, verify-oidc.sh
-- docs/1.0.0/   design set (spec.md, design.md, tasks.md, release-v1.0.0-development-notes.md) + existing design (01-architecture.md, 02-user-tenant-model.md, 03-oauth2-authorization-server.md, 04-permission-model.md)
+- docs/1.1.0/     v1.1.0 design set (spec.md, design.md, tasks.md, release-v1.1.0-development-notes.md)
+- docs/1.0.0/     v1.0.0 design set + 01-architecture.md ... 04-permission-model.md
 
 Build (backend):  cd backend && mvn -q -DskipTests clean package
+Test (backend):   cd backend && mvn -q test && mvn -q -Dtest=FederatedLoginIT test
 Run (local/H2):   ./scripts/start-local-jar.sh --build
   URL: http://localhost:8080
   Login: POST /api/auth/login { userName, password }
@@ -32,6 +57,6 @@ Run (local/H2):   ./scripts/start-local-jar.sh --build
 
 Docs:
 - README.md / README.en.md
-- docs/01-architecture.md ... docs/04-permission-model.md
+- docs/1.1.0/spec.md, design.md, tasks.md, release-v1.1.0-development-notes.md
 - AGENTS.md
 - CHANGELOG.md

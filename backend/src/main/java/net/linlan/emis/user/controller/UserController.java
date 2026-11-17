@@ -40,6 +40,7 @@ public class UserController {
     @RequiresRole(0)
     @DeleteMapping("/{id}")
     public Result<Integer> delete(@PathVariable Long id) {
-        return Result.success("删除" + userService.softDelete(id) + "条记录", userService.softDelete(id));
+        int deleted = userService.softDelete(id);
+        return Result.success("删除" + deleted + "条记录", deleted);
     }
 }

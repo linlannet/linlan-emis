@@ -23,6 +23,9 @@ public class RoleInterceptor implements HandlerInterceptor {
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }
+        if ("/error".equals(request.getRequestURI())) {
+            return true;
+        }
         if (handlerMethod.getMethodAnnotation(PublicApi.class) != null) {
             return true;
         }

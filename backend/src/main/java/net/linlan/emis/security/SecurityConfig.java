@@ -44,20 +44,35 @@ import java.util.UUID;
 @Configuration
 public class SecurityConfig {
 
-    /** 单一安全链：授权服务器 + 表单登录 + /api 放行 */
+    /**
+     * 授权服务器安全链：只匹配 SAS 端点（/oauth2/**、/userinfo、discovery 等）。
+     * 必须与 /api 的 HS256 JWT 链分离：否则 SAS 的 RS256 Bearer 解析会拦截并拒绝 /api 的 HS256 令牌。
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServer = new OAuth2AuthorizationServerConfigurer();
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**", "/h2-console/**", "/error", "/favicon.ico").permitAll()
-                        .anyRequest().authenticated())
+                .securityMatcher(authorizationServer.getEndpointsMatcher())
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .with(authorizationServer, configurer -> configurer.oidc(Customizer.withDefaults()))
-                .formLogin(Customizer.withDefaults())
                 // 授权端点（浏览器跳转）：覆盖 AS 默认 Bearer 入口，改为重定向到 /login
                 .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(
                         new LoginUrlAuthenticationEntryPoint("/login"),
                         new AntPathRequestMatcher("/oauth2/authorize")))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/**"));
+        return http.build();
+    }
+
+    /** 默认安全链：/api 自管 JWT（permitAll），表单登录页供 SAS 浏览器流程复用 */
+    @Bean
+    @Order(2)
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/**", "/h2-console/**", "/error", "/favicon.ico", "/login").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(Customizer.withDefaults())
                 // /api/** 为无状态 JWT 接口（自管 JwtAuthenticationFilter + RoleInterceptor），豁免 CSRF
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/api/**"))
                 // /api/** 跨域放行：dsh-java-app 等前端跨源调用登录/注销接口（本地开发放开，生产请收紧 allow-list）

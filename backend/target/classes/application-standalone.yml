@@ -24,7 +24,7 @@ spring:
         issuer: http://localhost:8080
 
 mybatis:
-  type-aliases-package: net.linlan.emis.sys.entity
+  type-aliases-package: net.linlan.emis.*.entity
   configuration:
     map-underscore-to-camel-case: true
 
@@ -37,3 +37,37 @@ emis:
     prefix: "Bearer "
     # 桌面端无登录界面时默认以主任放行：仅本地/内网演示用，生产务必 false
     default-director-enabled: false
+  tenant:
+    # 仅可信服务间链路可开启；默认关闭，避免伪造 X-* 头覆盖 JWT 身份
+    header-trust-enabled: ${EMIS_TENANT_HEADER_TRUST_ENABLED:false}
+  federated:
+    github:
+      enabled: ${EMIS_FEDERATED_GITHUB_ENABLED:false}
+      client-id: ${EMIS_FEDERATED_GITHUB_CLIENT_ID:}
+      client-secret: ${EMIS_FEDERATED_GITHUB_CLIENT_SECRET:}
+      redirect-uri: ${EMIS_FEDERATED_GITHUB_REDIRECT_URI:}
+      app-id: ${EMIS_FEDERATED_GITHUB_APP_ID:}
+      private-key-path: ${EMIS_FEDERATED_GITHUB_PRIVATE_KEY_PATH:}
+    wechat:
+      enabled: ${EMIS_FEDERATED_WECHAT_ENABLED:false}
+      app-id: ${EMIS_FEDERATED_WECHAT_APP_ID:}
+      app-secret: ${EMIS_FEDERATED_WECHAT_APP_SECRET:}
+      redirect-uri: ${EMIS_FEDERATED_WECHAT_REDIRECT_URI:}
+      require-unionid: ${EMIS_FEDERATED_WECHAT_REQUIRE_UNIONID:true}
+    provisioning:
+      enabled: ${EMIS_FEDERATED_PROVISIONING_ENABLED:true}
+      default-tenant-id: ${EMIS_FEDERATED_PROVISIONING_DEFAULT_TENANT_ID:2}
+      default-role-level: ${EMIS_FEDERATED_PROVISIONING_DEFAULT_ROLE_LEVEL:2}
+    state:
+      ttl: ${EMIS_FEDERATED_STATE_TTL:10m}
+      max-entries: ${EMIS_FEDERATED_STATE_MAX_ENTRIES:10000}
+    http:
+      connect-timeout: ${EMIS_FEDERATED_HTTP_CONNECT_TIMEOUT:3s}
+      read-timeout: ${EMIS_FEDERATED_HTTP_READ_TIMEOUT:5s}
+    rate-limit:
+      authorize-per-minute: ${EMIS_FEDERATED_RATE_LIMIT_AUTHORIZE_PER_MINUTE:20}
+      callback-per-minute: ${EMIS_FEDERATED_RATE_LIMIT_CALLBACK_PER_MINUTE:30}
+      local-login-per-minute: ${EMIS_FEDERATED_RATE_LIMIT_LOCAL_LOGIN_PER_MINUTE:10}
+    redirect-whitelist: ${EMIS_FEDERATED_REDIRECT_WHITELIST:}
+    audit:
+      enabled: ${EMIS_FEDERATED_AUDIT_ENABLED:true}

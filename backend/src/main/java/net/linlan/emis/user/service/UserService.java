@@ -1,6 +1,10 @@
 package net.linlan.emis.user.service;
 
 import net.linlan.emis.common.TenantContext;
+import net.linlan.emis.federated.config.FederatedProperties;
+import net.linlan.emis.federated.config.RoleLevels;
+import net.linlan.emis.federated.identity.FederatedIdentityService;
+import net.linlan.emis.federated.identity.UserProvisioningService;
 import net.linlan.emis.user.security.JwtUtil;
 import net.linlan.emis.user.dto.LoginRequest;
 import net.linlan.emis.user.dto.LoginResponse;
@@ -10,6 +14,7 @@ import net.linlan.emis.user.entity.EmisUser;
 import net.linlan.emis.user.mapper.EmisUserMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,11 +27,16 @@ public class UserService {
     private final EmisUserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final FederatedProperties federatedProperties;
+    private final FederatedIdentityService federatedIdentityService;
 
-    public UserService(EmisUserMapper userMapper, JwtUtil jwtUtil, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(EmisUserMapper userMapper, JwtUtil jwtUtil, BCryptPasswordEncoder passwordEncoder,
+                       FederatedProperties federatedProperties, FederatedIdentityService federatedIdentityService) {
         this.userMapper = userMapper;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.federatedProperties = federatedProperties;
+        this.federatedIdentityService = federatedIdentityService;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -36,6 +46,9 @@ public class UserService {
         }
         if ("1".equals(user.getStatus())) {
             throw new IllegalStateException("账号已停用");
+        }
+        if (UserProvisioningService.FEDERATED_PASSWORD_SENTINEL.equals(user.getPassword())) {
+            throw new IllegalArgumentException("用户名或密码错误");
         }
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("用户名或密码错误");
@@ -53,8 +66,8 @@ public class UserService {
         user.setNickName(request.getNickName());
         user.setEmail(request.getEmail());
         user.setPhonenumber(request.getPhonenumber());
-        user.setTenantId(request.getTenantId() != null ? request.getTenantId() : 1L);
-        user.setRoleLevel(2);
+        user.setTenantId(federatedProperties.getProvisioning().getDefaultTenantId());
+        user.setRoleLevel(RoleLevels.EXPERIENCE);
         user.setStatus("0");
         user.setCreatedBy("register");
         userMapper.insert(user);
@@ -81,8 +94,13 @@ public class UserService {
         return userMapper.count();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int softDelete(Long userId) {
-        return userMapper.softDelete(userId);
+        int rows = userMapper.softDelete(userId);
+        if (rows > 0) {
+            federatedIdentityService.invalidateByUser(userId);
+        }
+        return rows;
     }
 
     private LoginResponse toLogin(EmisUser user) {

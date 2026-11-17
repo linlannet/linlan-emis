@@ -38,4 +38,24 @@ public interface EmisUserMapper {
 
     @Select("SELECT COUNT(*) FROM emis_user WHERE del_flag = '0'")
     long count();
+
+    @Select("SELECT * FROM emis_user WHERE user_id = #{userId}")
+    EmisUser findByIdIncludeDeleted(@Param("userId") Long userId);
+
+    @Select("SELECT COUNT(*) FROM emis_user WHERE user_name = #{userName}")
+    int countByUserNameIncludeDeleted(@Param("userName") String userName);
+
+    @Select("SELECT COUNT(*) FROM emis_user WHERE del_flag = '0' AND LOWER(email) = LOWER(#{email})")
+    int countActiveByEmail(@Param("email") String email);
+
+    @Select("SELECT COUNT(*) FROM emis_user WHERE del_flag = '0' AND phonenumber = #{phonenumber}")
+    int countActiveByPhonenumber(@Param("phonenumber") String phonenumber);
+
+    @Update("UPDATE emis_user SET " +
+            "nick_name = CASE WHEN nick_name IS NULL OR nick_name = '' THEN #{nickName} ELSE nick_name END, " +
+            "avatar_url = CASE WHEN avatar_url IS NULL OR avatar_url = '' THEN #{avatarUrl} ELSE avatar_url END, " +
+            "updated_at = NOW() WHERE user_id = #{userId}")
+    int fillProfileIfBlank(@Param("userId") Long userId,
+                           @Param("nickName") String nickName,
+                           @Param("avatarUrl") String avatarUrl);
 }

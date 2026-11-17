@@ -1,6 +1,8 @@
 package net.linlan.emis.user.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.linlan.emis.common.Result;
+import net.linlan.emis.federated.security.RateLimitGuard;
 import net.linlan.emis.user.dto.LoginRequest;
 import net.linlan.emis.user.dto.LoginResponse;
 import net.linlan.emis.user.dto.RegisterRequest;
@@ -19,14 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final UserService userService;
+    private final RateLimitGuard rateLimitGuard;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, RateLimitGuard rateLimitGuard) {
         this.userService = userService;
+        this.rateLimitGuard = rateLimitGuard;
     }
 
     @PublicApi
     @PostMapping("/login")
-    public Result<LoginResponse> login(@RequestBody LoginRequest request) {
+    public Result<LoginResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        rateLimitGuard.checkLocalLogin(httpRequest);
         return Result.success(userService.login(request));
     }
 

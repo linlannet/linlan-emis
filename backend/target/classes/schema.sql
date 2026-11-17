@@ -96,3 +96,48 @@ CREATE TABLE IF NOT EXISTS oauth2_authorization_consent (
 
 CREATE INDEX ix_oauth2_authorization_rpid_pn
     ON oauth2_authorization (registered_client_id, principal_name);
+
+-- ===== v1.1.0 联合登录：外部身份绑定 + 审计（不存任何密钥/令牌/授权码） =====
+CREATE TABLE IF NOT EXISTS emis_federated_identity (
+    binding_id       BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    user_id          BIGINT        NOT NULL COMMENT '平台用户ID（创建后不可变）',
+    tenant_id        BIGINT        DEFAULT NULL COMMENT '绑定时用户租户快照（权威值在 emis_user）',
+    provider         VARCHAR(32)   NOT NULL COMMENT 'github / wechat',
+    provider_subject VARCHAR(128)  NOT NULL COMMENT 'github=数字用户ID；wechat=unionid',
+    open_id          VARCHAR(128)  DEFAULT NULL COMMENT '仅 wechat；记录最近一次 openid',
+    display_name     VARCHAR(128)  DEFAULT NULL COMMENT '展示用，不参与身份判定',
+    avatar_url       VARCHAR(512)  DEFAULT NULL COMMENT '展示用，不参与身份判定',
+    status           VARCHAR(16)   NOT NULL DEFAULT 'active' COMMENT 'active / unbound / invalid',
+    active_flag      CHAR(1)       DEFAULT NULL COMMENT 'active 时为 Y，其余为 NULL',
+    bound_at         DATETIME      NOT NULL COMMENT '绑定建立时间',
+    unbound_at       DATETIME      DEFAULT NULL COMMENT '解绑时间',
+    last_login_at    DATETIME      DEFAULT NULL COMMENT '最近一次经该绑定成功登录',
+    login_count      BIGINT        NOT NULL DEFAULT 0 COMMENT '经该绑定成功登录次数',
+    extra_json       VARCHAR(2000) DEFAULT NULL COMMENT '扩展位：禁存 token/secret/私钥/授权码',
+    created_at       DATETIME      NOT NULL,
+    updated_at       DATETIME      DEFAULT NULL,
+    CONSTRAINT uk_fed_subject_active UNIQUE (provider, provider_subject, active_flag),
+    CONSTRAINT uk_fed_user_provider_active UNIQUE (user_id, provider, active_flag),
+    CONSTRAINT ck_fed_provider CHECK (provider IN ('github', 'wechat')),
+    CONSTRAINT ck_fed_status CHECK (status IN ('active', 'unbound', 'invalid')),
+    CONSTRAINT ck_fed_active_flag CHECK (
+        (status = 'active' AND active_flag = 'Y') OR
+        (status <> 'active' AND active_flag IS NULL)
+    )
+);
+
+CREATE TABLE IF NOT EXISTS emis_federated_audit (
+    audit_id     BIGINT        AUTO_INCREMENT PRIMARY KEY,
+    event_time   DATETIME      NOT NULL COMMENT '事件时间',
+    provider     VARCHAR(32)   DEFAULT NULL COMMENT 'github / wechat / null（平台级事件）',
+    event_type   VARCHAR(64)   NOT NULL COMMENT '见 FederatedAuditEventType',
+    event_result VARCHAR(16)   NOT NULL COMMENT 'success / failure / rejected',
+    error_code   VARCHAR(16)   DEFAULT NULL COMMENT '业务码',
+    request_id   VARCHAR(64)   DEFAULT NULL COMMENT '请求关联 ID',
+    user_id      BIGINT        DEFAULT NULL COMMENT '仅当已知',
+    tenant_id    BIGINT        DEFAULT NULL COMMENT '仅当已知',
+    client_ip    VARCHAR(64)   DEFAULT NULL,
+    user_agent   VARCHAR(255)  DEFAULT NULL,
+    subject_mask VARCHAR(64)   DEFAULT NULL COMMENT '掩码后的 subject',
+    extra_info   VARCHAR(1000) DEFAULT NULL COMMENT '脱敏补充；禁存敏感值'
+);

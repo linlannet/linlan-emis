@@ -2,7 +2,11 @@ package net.linlan.emis.config;
 
 import net.linlan.emis.user.entity.EmisUser;
 import net.linlan.emis.user.mapper.EmisUserMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -15,12 +19,16 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * 数据初始化（开发/演示用）：首次启动时写入默认租户 + 管理员/访客账号 + 测试 OIDC 客户端。
  */
 @Component
+@Order(10)
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     private final EmisUserMapper userMapper;
     private final JdbcTemplate jdbcTemplate;
@@ -42,6 +50,7 @@ public class DataInitializer implements CommandLineRunner {
             jdbcTemplate.update(
                     "INSERT INTO emis_tenant (tenant_id, tenant_name, status, created_at) VALUES (1, '默认租户', '0', NOW())");
         }
+        seedExperienceTenant();
 
         if (userMapper.count() == 0) {
             EmisUser admin = new EmisUser();
@@ -66,6 +75,21 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         seedTestClient();
+    }
+
+    /** 体验租户幂等播种：联合登录自助开户的默认落点，不复用默认租户 1 */
+    private void seedExperienceTenant() {
+        List<Long> existing = jdbcTemplate.queryForList(
+                "SELECT tenant_id FROM emis_tenant WHERE tenant_name = ?", Long.class, "体验租户");
+        if (!existing.isEmpty()) {
+            return;
+        }
+        try {
+            jdbcTemplate.update(
+                    "INSERT INTO emis_tenant (tenant_id, tenant_name, status, created_at) VALUES (2, '体验租户', '0', NOW())");
+        } catch (DuplicateKeyException ex) {
+            log.warn("体验租户 ID 2 已被占用，请运维核对 provisioning.default-tenant-id");
+        }
     }
 
     /** 落库一个测试 OIDC 客户端（机密客户端，供 test-client 模块走标准授权码登录） */
